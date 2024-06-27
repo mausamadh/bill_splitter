@@ -1,29 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sajal Poudel</title>
-    <style>
-        #hello{
-            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display:flex;
-            font-size:1.4rem;
-
-            justify-content: center;
-            align-items: center;
-            }
-        h1{
-            display:block;
-        }
-
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bill Splitter</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .item-list, .person-list {
+      min-height: 150px;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 20px;
+      background-color: #f9f9f9;
+    }
+    .drag-item {
+      padding: 5px;
+      margin: 5px;
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 5px;
+      cursor: grab;
+      position: relative;
+    }
+    .edit-item, .delete-person {
+      cursor: pointer;
+      color: red;
+      margin-left: 10px;
+    }
+    .edit-item {
+      cursor: pointer;
+      color: blue;
+      margin-left: 10px;
+    }
+    .delete-person {
+      position: absolute;
+      right: 5px;
+      top: 5px;
+    }
+  </style>
 </head>
 <body>
-    <div id="hello">
-    <h1>Hello World!</h1>
-    <p>This website is created using Github Pages.</p>
+  <div class="container">
+    <h1 class="my-4">Bill Splitter</h1>
+    <div class="row">
+      <div class="col-md-4">
+        <h3>Add People</h3>
+        <input type="text" id="personName" class="form-control" placeholder="Person Name">
+        <button id="addPerson" class="btn btn-primary my-2">Add Person</button>
+        <div id="peopleList" class="person-list">
+          <!-- List of people will appear here -->
+        </div>
+      </div>
+      <div class="col-md-8">
+        <h3>Add Items</h3>
+        <input type="text" id="itemName" class="form-control" placeholder="Item Name">
+        <input type="number" id="itemPrice" class="form-control my-2" placeholder="Item Price">
+        <button id="addItem" class="btn btn-primary my-2">Add Item</button>
+        <div id="itemList" class="item-list">
+          <!-- List of items will appear here -->
+        </div>
+      </div>
     </div>
+    <button id="calculateBill" class="btn btn-success my-4">Calculate Bill</button>
+    <div id="result"></div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
