@@ -37,10 +37,13 @@
       right: 5px;
       top: 5px;
     }
+    .item {
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container-fluid">
     <h1 class="my-4">Bill Splitter</h1>
     <div class="row">
       <div class="col-md-4">
@@ -53,12 +56,24 @@
       </div>
       <div class="col-md-8">
         <h3>Add Items</h3>
-        <input type="text" id="itemName" class="form-control" placeholder="Item Name">
-        <input type="number" id="itemPrice" class="form-control my-2" placeholder="Item Price">
-        <button id="addItem" class="btn btn-primary my-2">Add Item</button>
-        <div id="itemList" class="item-list">
-          <!-- List of items will appear here -->
+        <div class="row">
+          <div class="col-md-6">
+            <input type="text" id="itemName" class="form-control" placeholder="Item Name">
+          </div>
+          <div class="col-md-6">
+            <input type="number" id="itemPrice" class="form-control" placeholder="Item Price">
+          </div>
         </div>
+        <button id="addItem" class="btn btn-primary my-2">Add Item</button>
+        <div id="itemList" class="row">
+          <!-- List of items will appear here in two columns -->
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <h3>Total Payment</h3>
+        <input type="number" id="totalPayment" class="form-control" placeholder="Total Payment">
       </div>
     </div>
     <button id="calculateBill" class="btn btn-success my-4">Calculate Bill</button>
