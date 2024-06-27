@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   itemList.addEventListener('dragover', (event) => {
     event.preventDefault();
+    handleDragScroll(event);
   });
 
   itemList.addEventListener('drop', (event) => {
@@ -145,5 +146,17 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateTotalAmount() {
     const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
     totalAmountSpan.textContent = totalAmount.toFixed(2);
+  }
+
+  function handleDragScroll(event) {
+    const rect = itemList.getBoundingClientRect();
+    const y = event.clientY;
+    const threshold = 50; // Adjust scroll threshold as needed
+
+    if (y < rect.top + threshold && itemList.scrollTop > 0) {
+      itemList.scrollTop -= 10; // Adjust scroll speed as needed
+    } else if (y > rect.bottom - threshold && itemList.scrollTop < itemList.scrollHeight - rect.height) {
+      itemList.scrollTop += 10; // Adjust scroll speed as needed
+    }
   }
 });
