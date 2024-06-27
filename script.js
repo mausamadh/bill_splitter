@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const itemPriceInput = document.getElementById('itemPrice');
   const itemList = document.getElementById('itemList');
 
+  const totalPaymentInput = document.getElementById('totalPayment');
   const calculateBillButton = document.getElementById('calculateBill');
   const resultDiv = document.getElementById('result');
 
@@ -97,12 +98,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   calculateBillButton.addEventListener('click', () => {
+    const totalPayment = parseFloat(totalPaymentInput.value);
+    const totalBill = items.reduce((sum, item) => sum + item.price, 0);
+    const discountPercent = totalBill > 0 ? ((totalBill - totalPayment) / totalBill) * 100 : 0;
+
     const billSummary = people.map(person => {
       const personItems = items.filter(item => item.people.includes(person.id));
       const total = personItems.reduce((sum, item) => {
         return sum + item.price / item.people.length;
       }, 0);
-      return { name: person.name, total: total.toFixed(2) };
+      const discountedTotal = total - (total * discountPercent / 100);
+      return { name: person.name, total: total.toFixed(2), discountedTotal: discountedTotal.toFixed(2) };
     });
 
     let resultHtml = `
@@ -112,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <tr>
             <th>Person</th>
             <th>Total (Rs.)</th>
+            <th>Discounted Total (Rs.)</th>
           </tr>
         </thead>
         <tbody>
@@ -121,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <tr>
           <td>${entry.name}</td>
           <td>Rs. ${entry.total}</td>
+          <td>Rs. ${entry.discountedTotal}</td>
         </tr>
       `;
     });
