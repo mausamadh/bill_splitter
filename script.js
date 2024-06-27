@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const item = { name, price, id: `item-${Date.now()}`, people: [] };
       items.push(item);
       const itemElement = document.createElement('div');
-      itemElement.className = 'item';
+      itemElement.className = 'item col-md-6';
       itemElement.dataset.id = item.id;
       itemElement.innerHTML = `
         <h5>${name} - Rs. <span class="item-price">${price.toFixed(2)}</span></h5>
