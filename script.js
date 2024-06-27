@@ -103,6 +103,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   calculateBillButton.addEventListener('click', () => {
     const totalPayment = parseFloat(totalPaymentInput.value);
+    if (isNaN(totalPayment) || totalPayment <= 0) {
+    alert('Please enter a valid total payment amount.');
+    totalPaymentInput.focus();
+    return;
+  }
     const totalBill = items.reduce((sum, item) => sum + item.price, 0);
     const discountPercent = totalBill > 0 ? ((totalBill - totalPayment) / totalBill) * 100 : 0;
 
