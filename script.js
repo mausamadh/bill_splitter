@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
       personElement.appendChild(deletePersonSpan);
       peopleList.appendChild(personElement);
       personNameInput.value = '';
+      enableTouchDrag(personElement);
     }
   });
 
@@ -104,10 +105,11 @@ document.addEventListener('DOMContentLoaded', () => {
   calculateBillButton.addEventListener('click', () => {
     const totalPayment = parseFloat(totalPaymentInput.value);
     if (isNaN(totalPayment) || totalPayment <= 0) {
-    alert('Please enter a valid total payment amount.');
-    totalPaymentInput.focus();
-    return;
-  }
+      alert('Please enter a valid total payment amount.');
+      totalPaymentInput.focus();
+      return;
+    }
+
     const totalBill = items.reduce((sum, item) => sum + item.price, 0);
     const discountPercent = totalBill > 0 ? ((totalBill - totalPayment) / totalBill) * 100 : 0;
 
@@ -164,4 +166,35 @@ document.addEventListener('DOMContentLoaded', () => {
       itemList.scrollTop += 10; // Adjust scroll speed as needed
     }
   }
+
+  function enableTouchDrag(element) {
+    let touchStartY = 0;
+    let touchEndY = 0;
+
+    element.addEventListener('touchstart', (event) => {
+      touchStartY = event.touches[0].clientY;
+      event.dataTransfer = { setData: () => {} }; // Mock dataTransfer object for touch events
+      event.dataTransfer.setData('text', event.target.dataset.id);
+    });
+
+    element.addEventListener('touchmove', (event) => {
+      touchEndY = event.touches[0].clientY;
+      const delta = touchEndY - touchStartY;
+      window.scrollBy(0, -delta);
+      touchStartY = touchEndY;
+    });
+
+    element.addEventListener('touchend', (event) => {
+      const dropEvent = new DragEvent('drop', {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer: event.dataTransfer,
+      });
+      const touchTarget = document.elementFromPoint(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+      if (touchTarget) touchTarget.dispatchEvent(dropEvent);
+    });
+  }
+
+  // Enable touch drag for existing items
+  document.querySelectorAll('.drag-item').forEach(enableTouchDrag);
 });
