@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const totalPaymentInput = document.getElementById('totalPayment');
   const calculateBillButton = document.getElementById('calculateBill');
   const resultDiv = document.getElementById('result');
+  const totalAmountSpan = document.getElementById('totalAmount');
 
   addPersonButton.addEventListener('click', () => {
     const name = personNameInput.value.trim();
@@ -58,11 +59,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (newPrice) {
           item.price = newPrice;
           itemElement.querySelector('.item-price').textContent = newPrice.toFixed(2);
+          updateTotalAmount();
         }
       };
       itemList.appendChild(itemElement);
       itemNameInput.value = '';
       itemPriceInput.value = '';
+      updateTotalAmount();
     }
   });
 
@@ -138,4 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     resultDiv.innerHTML = resultHtml;
   });
+
+  function updateTotalAmount() {
+    const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
+    totalAmountSpan.textContent = totalAmount.toFixed(2);
+  }
 });
