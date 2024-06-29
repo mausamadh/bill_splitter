@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const calculateBillButton = document.getElementById('calculateBill');
   const resultDiv = document.getElementById('result');
   const totalAmountSpan = document.getElementById('totalAmount');
-  const copyTableButton = document.getElementById('copyTable');
 
   addPersonButton.addEventListener('click', () => {
     const name = personNameInput.value.trim();
@@ -125,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let resultHtml = `
       <h4>Bill Summary:</h4>
-      <button id="copyTable" class="btn btn-secondary">Copy Table</button>
+      
       <table id="billSummaryTable" class="table table-striped">
         <thead>
           <tr>
@@ -150,29 +149,9 @@ document.addEventListener('DOMContentLoaded', () => {
       </table>
     `;
     resultDiv.innerHTML = resultHtml;
-  });
 
-     document.getElementById('copyTable').addEventListener('click', () => {
-      const billSummaryTable = document.getElementById('billSummaryTable');
-      if (billSummaryTable) {
-        const range = document.createRange();
-        range.selectNode(billSummaryTable);
-        window.getSelection().removeAllRanges();
-        window.getSelection().addRange(range);
-
-        try {
-          const successful = document.execCommand('copy');
-          const msg = successful ? 'successful' : 'unsuccessful';
-          alert('Copy table was ' + msg);
-        } catch (err) {
-          alert('Oops, unable to copy');
-        }
-
-        window.getSelection().removeAllRanges();
-      } else {
-        alert('No table to copy!');
-      }
-    });
+    // Add event listener to the "Download PDF" button
+    
   });
 
   function updateTotalAmount() {
