@@ -125,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let resultHtml = `
       <h4>Bill Summary:</h4>
+      <button id="copyTable" class="btn btn-secondary">Copy Table</button>
       <table id="billSummaryTable" class="table table-striped">
         <thead>
           <tr>
