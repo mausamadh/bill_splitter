@@ -152,26 +152,27 @@ document.addEventListener('DOMContentLoaded', () => {
     resultDiv.innerHTML = resultHtml;
   });
 
-  copyTableButton.addEventListener('click', () => {
-    const billSummaryTable = document.getElementById('billSummaryTable');
-    if (billSummaryTable) {
-      const range = document.createRange();
-      range.selectNode(billSummaryTable);
-      window.getSelection().removeAllRanges();
-      window.getSelection().addRange(range);
+     document.getElementById('copyTable').addEventListener('click', () => {
+      const billSummaryTable = document.getElementById('billSummaryTable');
+      if (billSummaryTable) {
+        const range = document.createRange();
+        range.selectNode(billSummaryTable);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
 
-      try {
-        const successful = document.execCommand('copy');
-        const msg = successful ? 'successful' : 'unsuccessful';
-        alert('Copy table was ' + msg);
-      } catch (err) {
-        alert('Oops, unable to copy');
+        try {
+          const successful = document.execCommand('copy');
+          const msg = successful ? 'successful' : 'unsuccessful';
+          alert('Copy table was ' + msg);
+        } catch (err) {
+          alert('Oops, unable to copy');
+        }
+
+        window.getSelection().removeAllRanges();
+      } else {
+        alert('No table to copy!');
       }
-
-      window.getSelection().removeAllRanges();
-    } else {
-      alert('No table to copy!');
-    }
+    });
   });
 
   function updateTotalAmount() {
