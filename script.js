@@ -1,204 +1,214 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const people = [];
-  const items = [];
+    const personNameInput = document.getElementById('personName');
+    const addPersonButton = document.getElementById('addPerson');
+    const peopleList = document.getElementById('peopleList');
+    const itemNameInput = document.getElementById('itemName');
+    const itemPriceInput = document.getElementById('itemPrice');
+    const addItemButton = document.getElementById('addItem');
+    const itemList = document.getElementById('itemList');
+    const totalAmountSpan = document.getElementById('totalAmount');
+    const totalPaymentInput = document.getElementById('totalPayment');
+    const calculateBillButton = document.getElementById('calculateBill');
+    const resultDiv = document.getElementById('result');
 
-  const addPersonButton = document.getElementById('addPerson');
-  const personNameInput = document.getElementById('personName');
-  const peopleList = document.getElementById('peopleList');
+    let people = [];
+    let items = [];
 
-  const addItemButton = document.getElementById('addItem');
-  const itemNameInput = document.getElementById('itemName');
-  const itemPriceInput = document.getElementById('itemPrice');
-  const itemList = document.getElementById('itemList');
+    addPersonButton.addEventListener('click', () => {
+      const name = personNameInput.value.trim();
+      if (name && !people.find(person => person.name === name)) {
+        people.push({ name });
+        updatePeopleList();
+        personNameInput.value = '';
+      }
+    });
 
-  const totalPaymentInput = document.getElementById('totalPayment');
-  const calculateBillButton = document.getElementById('calculateBill');
-  const resultDiv = document.getElementById('result');
-  const totalAmountSpan = document.getElementById('totalAmount');
+    addItemButton.addEventListener('click', () => {
+      const name = itemNameInput.value.trim();
+      const price = parseFloat(itemPriceInput.value.trim());
+      if (name && !isNaN(price) && price > 0) {
+        items.push({ name, price, people: [] });
+        updateItemList();
+        itemNameInput.value = '';
+        itemPriceInput.value = '';
+      }
+    });
 
-  addPersonButton.addEventListener('click', () => {
-    const name = personNameInput.value.trim();
-    if (name) {
-      const person = { name, id: `person-${Date.now()}` };
-      people.push(person);
-      const personElement = document.createElement('div');
-      personElement.className = 'drag-item';
-      personElement.draggable = true;
-      personElement.textContent = name;
-      personElement.dataset.id = person.id;
-      const deletePersonSpan = document.createElement('span');
-      deletePersonSpan.className = 'delete-person';
-      deletePersonSpan.innerHTML = '&times;';
-      deletePersonSpan.onclick = () => {
-        peopleList.removeChild(personElement);
-        const personIndex = people.findIndex(p => p.id === person.id);
-        if (personIndex > -1) people.splice(personIndex, 1);
-      };
-      personElement.appendChild(deletePersonSpan);
-      peopleList.appendChild(personElement);
-      personNameInput.value = '';
-      enableTouchDrag(personElement);
+    function updatePeopleList() {
+      peopleList.innerHTML = people.map((person, index) =>
+        `<div class="drag-item" data-id="${index}" draggable="true">
+          ${person.name} <span class="delete-person" onclick="deletePerson(${index})">X</span>
+        </div>`
+      ).join('');
+      setupDragAndDrop();
     }
-  });
 
-  addItemButton.addEventListener('click', () => {
-    const name = itemNameInput.value.trim();
-    const price = parseFloat(itemPriceInput.value);
-    if (name && price) {
-      const item = { name, price, id: `item-${Date.now()}`, people: [] };
-      items.push(item);
-      const itemElement = document.createElement('div');
-      itemElement.className = 'item col-md-6';
-      itemElement.dataset.id = item.id;
-      itemElement.innerHTML = `
-        <h5>${name} - Rs. <span class="item-price">${price.toFixed(2)}</span></h5>
-        <div class="item-people-list item-list" data-id="${item.id}"></div>
-        <span class="edit-item">Edit</span>
-      `;
-      itemElement.querySelector('.edit-item').onclick = () => {
-        const newPrice = parseFloat(prompt('Enter new price:', item.price));
-        if (newPrice) {
-          item.price = newPrice;
-          itemElement.querySelector('.item-price').textContent = newPrice.toFixed(2);
-          updateTotalAmount();
-        }
-      };
-      itemList.appendChild(itemElement);
-      itemNameInput.value = '';
-      itemPriceInput.value = '';
+    function updateItemList() {
+      itemList.innerHTML = items.map((item, index) =>
+        `<div class="item col-md-6" data-id="${index}">
+          <h5>${item.name}</h5>
+          <input type="number" class="form-control mb-2 item-price" placeholder="Price" value="${item.price.toFixed(2)}" onchange="updateItemPrice(${index}, this.value)">
+          <div class="item-people-list" data-id="${index}"></div>
+        </div>`
+      ).join('');
+      items.forEach((item, index) => updateItemPeopleList(index));
+      setupDragAndDrop();
       updateTotalAmount();
     }
-  });
 
-  itemList.addEventListener('dragover', (event) => {
-    event.preventDefault();
-    handleDragScroll(event);
-  });
+    function setupDragAndDrop() {
+      const dragItems = document.querySelectorAll('.drag-item');
+      dragItems.forEach(item => {
+        item.addEventListener('dragstart', handleDragStart);
+      });
 
-  itemList.addEventListener('drop', (event) => {
-    event.preventDefault();
-    const personId = event.dataTransfer.getData('text');
-    const personElement = document.querySelector(`[data-id="${personId}"]`);
-    const itemPeopleList = event.target.closest('.item').querySelector('.item-people-list');
-    const newPersonElement = personElement.cloneNode(true);
-    newPersonElement.querySelector('.delete-person').onclick = () => {
-      itemPeopleList.removeChild(newPersonElement);
-      const itemId = itemPeopleList.dataset.id;
-      const item = items.find(i => i.id === itemId);
-      const personIndex = item.people.indexOf(personId);
-      if (personIndex > -1) {
+      const itemElements = document.querySelectorAll('.item');
+      itemElements.forEach(item => {
+        item.addEventListener('dragover', handleDragOver);
+        item.addEventListener('drop', handleDrop);
+      });
+    }
+
+    function handleDragStart(event) {
+      event.dataTransfer.setData('text/plain', event.target.dataset.id);
+    }
+
+    function handleDragOver(event) {
+      event.preventDefault();
+    }
+
+    function handleDrop(event) {
+      event.preventDefault();
+      const personId = event.dataTransfer.getData('text/plain');
+      const itemId = event.currentTarget.dataset.id;
+
+      if (personId && itemId) {
+        const person = people[personId];
+        const item = items[itemId];
+        if (person && item) {
+          if (!item.people.find(p => p.name === person.name)) {
+            item.people.push(person);
+            updateItemPeopleList(itemId);
+          }
+        }
+      }
+    }
+
+    function updateItemPeopleList(itemId) {
+      const item = items[itemId];
+      const itemElement = document.querySelector(`.item[data-id="${itemId}"] .item-people-list`);
+      if (itemElement) {
+        itemElement.innerHTML = item.people.map((person, index) =>
+          `<div class="person-container">
+            ${person.name} <span class="delete-person" onclick="removePersonFromItem(${itemId}, ${index})">X</span>
+          </div>`
+        ).join('');
+      }
+    }
+
+    window.removePersonFromItem = (itemId, personIndex) => {
+      const item = items[itemId];
+      if (item && item.people[personIndex]) {
         item.people.splice(personIndex, 1);
+        updateItemPeopleList(itemId);
       }
     };
-    itemPeopleList.appendChild(newPersonElement);
-    const itemId = itemPeopleList.dataset.id;
-    const item = items.find(i => i.id === itemId);
-    if (!item.people.includes(personId)) {
-      item.people.push(personId);
+
+    window.deletePerson = (personId) => {
+      people.splice(personId, 1);
+      updatePeopleList();
+      items.forEach((item, index) => {
+        const personIndex = item.people.findIndex(p => p.name === people[personId]?.name);
+        if (personIndex !== -1) item.people.splice(personIndex, 1);
+        updateItemPeopleList(index);
+      });
+    };
+
+    window.updateItemPrice = (itemId, price) => {
+      items[itemId].price = parseFloat(price);
+      updateTotalAmount();
+    };
+
+    function calculateBill() {
+      const totalPayment = parseFloat(totalPaymentInput.value.trim()) || 0;
+      const totalItemCost = items.reduce((sum, item) => sum + item.price, 0);
+
+      return people.map(person => {
+        const total = items.reduce((sum, item) => {
+          const itemCost = item.price * (item.people.some(p => p.name === person.name) ? 1 / item.people.length : 0);
+          return sum + itemCost;
+        }, 0);
+
+        const discountedTotal = totalPayment * (total / totalItemCost);
+
+        return {
+          name: person.name,
+          total: total.toFixed(2),
+          discountedTotal: discountedTotal.toFixed(2),
+        };
+      });
     }
-  });
 
-  peopleList.addEventListener('dragstart', (event) => {
-    event.dataTransfer.setData('text', event.target.dataset.id);
-  });
+    calculateBillButton.addEventListener('click', () => {
+      if (!totalPaymentInput.value) {
+        alert('Please enter the total payment amount.');
+        return;
+      }
 
-  calculateBillButton.addEventListener('click', () => {
-    const totalPayment = parseFloat(totalPaymentInput.value);
-    if (isNaN(totalPayment) || totalPayment <= 0) {
-      alert('Please enter a valid total payment amount.');
-      totalPaymentInput.focus();
-      return;
-    }
+      const billSummary = calculateBill();
+      const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
+      const totalDiscountedAmount = totalPaymentInput.value.trim();
 
-    const totalBill = items.reduce((sum, item) => sum + item.price, 0);
-    const discountPercent = totalBill > 0 ? ((totalBill - totalPayment) / totalBill) * 100 : 0;
-
-    const billSummary = people.map(person => {
-      const personItems = items.filter(item => item.people.includes(person.id));
-      const total = personItems.reduce((sum, item) => {
-        return sum + item.price / item.people.length;
-      }, 0);
-      const discountedTotal = total - (total * discountPercent / 100);
-      return { name: person.name, total: total.toFixed(2), discountedTotal: discountedTotal.toFixed(2) };
-    });
-
-    let resultHtml = `
-      <h4>Bill Summary:</h4>
-      
-      <table id="billSummaryTable" class="table table-striped">
-        <thead>
-          <tr>
-            <th>Person</th>
-            <th>Total (Rs.)</th>
-            <th>Discounted Total (Rs.)</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-    billSummary.forEach(entry => {
-      resultHtml += `
-        <tr>
-          <td>${entry.name}</td>
-          <td>Rs. ${entry.total}</td>
-          <td>Rs. ${entry.discountedTotal}</td>
-        </tr>
+      let resultHtml = `
+        <h4>Bill Summary:</h4>
+        <button id="copyTable" class="btn btn-secondary mb-2">Copy Table</button>
+        <table id="billSummaryTable" class="table table-striped">
+          <thead>
+            <tr>
+              <th>Person</th>
+              <th>Total (Rs.)</th>
+              <th>To Be Paid (Rs.)</th>
+            </tr>
+          </thead>
+          <tbody>
       `;
-    });
-    resultHtml += `
+      billSummary.forEach(entry => {
+        resultHtml += `
+          <tr>
+            <td>${entry.name}</td>
+            <td>Rs. ${entry.total}</td>
+            <td>Rs. ${entry.discountedTotal}</td>
+          </tr>
+        `;
+      });
+      resultHtml += `
+          <tr>
+            <td><strong>Total</strong></td>
+            <td><strong>Rs. ${totalAmount.toFixed(2)}</strong></td>
+            <td><strong>Rs. ${totalDiscountedAmount}</strong></td>
+          </tr>
         </tbody>
       </table>
-    `;
-    resultDiv.innerHTML = resultHtml;
+      `;
+      resultDiv.innerHTML = resultHtml;
 
-    // Add event listener to the "Download PDF" button
-    
-  });
-
-  function updateTotalAmount() {
-    const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
-    totalAmountSpan.textContent = totalAmount.toFixed(2);
-  }
-
-  function handleDragScroll(event) {
-    const rect = itemList.getBoundingClientRect();
-    const y = event.clientY;
-    const threshold = 50; // Adjust scroll threshold as needed
-
-    if (y < rect.top + threshold && itemList.scrollTop > 0) {
-      itemList.scrollTop -= 10; // Adjust scroll speed as needed
-    } else if (y > rect.bottom - threshold && itemList.scrollTop < itemList.scrollHeight - rect.height) {
-      itemList.scrollTop += 10; // Adjust scroll speed as needed
-    }
-  }
-
-  function enableTouchDrag(element) {
-    let touchStartY = 0;
-    let touchEndY = 0;
-
-    element.addEventListener('touchstart', (event) => {
-      touchStartY = event.touches[0].clientY;
-      event.dataTransfer = { setData: () => {} }; // Mock dataTransfer object for touch events
-      event.dataTransfer.setData('text', event.target.dataset.id);
-    });
-
-    element.addEventListener('touchmove', (event) => {
-      touchEndY = event.touches[0].clientY;
-      const delta = touchEndY - touchStartY;
-      window.scrollBy(0, -delta);
-      touchStartY = touchEndY;
-    });
-
-    element.addEventListener('touchend', (event) => {
-      const dropEvent = new DragEvent('drop', {
-        bubbles: true,
-        cancelable: true,
-        dataTransfer: event.dataTransfer,
+      document.getElementById('copyTable').addEventListener('click', () => {
+        const billSummaryTable = document.getElementById('billSummaryTable');
+        if (billSummaryTable) {
+          const range = document.createRange();
+          range.selectNode(billSummaryTable);
+          window.getSelection().removeAllRanges();
+          window.getSelection().addRange(range);
+          document.execCommand('copy');
+          alert('Table copied to clipboard!');
+        }
       });
-      const touchTarget = document.elementFromPoint(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
-      if (touchTarget) touchTarget.dispatchEvent(dropEvent);
     });
-  }
 
-  // Enable touch drag for existing items
-  document.querySelectorAll('.drag-item').forEach(enableTouchDrag);
-});
+    function updateTotalAmount() {
+      const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
+      totalAmountSpan.textContent = totalAmount.toFixed(2);
+    }
+
+    window.updateTotalAmount = updateTotalAmount;
+  });
