@@ -10,10 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalPaymentInput = document.getElementById('totalPayment');
     const calculateBillButton = document.getElementById('calculateBill');
     const resultDiv = document.getElementById('result');
-
+  
     let people = [];
     let items = [];
-
+  
     addPersonButton.addEventListener('click', () => {
       const name = personNameInput.value.trim();
       if (name && !people.find(person => person.name === name)) {
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
         personNameInput.value = '';
       }
     });
-
+  
     addItemButton.addEventListener('click', () => {
       const name = itemNameInput.value.trim();
       const price = parseFloat(itemPriceInput.value.trim());
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         itemPriceInput.value = '';
       }
     });
-
+  
     function updatePeopleList() {
       peopleList.innerHTML = people.map((person, index) =>
         `<div class="drag-item" data-id="${index}" draggable="true">
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ).join('');
       setupDragAndDrop();
     }
-
+  
     function updateItemList() {
       itemList.innerHTML = items.map((item, index) =>
         `<div class="item col-md-6" data-id="${index}">
@@ -55,33 +55,33 @@ document.addEventListener('DOMContentLoaded', () => {
       setupDragAndDrop();
       updateTotalAmount();
     }
-
+  
     function setupDragAndDrop() {
       const dragItems = document.querySelectorAll('.drag-item');
       dragItems.forEach(item => {
         item.addEventListener('dragstart', handleDragStart);
       });
-
+  
       const itemElements = document.querySelectorAll('.item');
       itemElements.forEach(item => {
         item.addEventListener('dragover', handleDragOver);
         item.addEventListener('drop', handleDrop);
       });
     }
-
+  
     function handleDragStart(event) {
       event.dataTransfer.setData('text/plain', event.target.dataset.id);
     }
-
+  
     function handleDragOver(event) {
       event.preventDefault();
     }
-
+  
     function handleDrop(event) {
       event.preventDefault();
       const personId = event.dataTransfer.getData('text/plain');
       const itemId = event.currentTarget.dataset.id;
-
+  
       if (personId && itemId) {
         const person = people[personId];
         const item = items[itemId];
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     }
-
+  
     function updateItemPeopleList(itemId) {
       const item = items[itemId];
       const itemElement = document.querySelector(`.item[data-id="${itemId}"] .item-people-list`);
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ).join('');
       }
     }
-
+  
     window.removePersonFromItem = (itemId, personIndex) => {
       const item = items[itemId];
       if (item && item.people[personIndex]) {
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateItemPeopleList(itemId);
       }
     };
-
+  
     window.deletePerson = (personId) => {
       people.splice(personId, 1);
       updatePeopleList();
@@ -123,24 +123,33 @@ document.addEventListener('DOMContentLoaded', () => {
         updateItemPeopleList(index);
       });
     };
-
+  
     window.updateItemPrice = (itemId, price) => {
       items[itemId].price = parseFloat(price);
       updateTotalAmount();
     };
-
+  
     function calculateBill() {
       const totalPayment = parseFloat(totalPaymentInput.value.trim()) || 0;
-      const totalItemCost = items.reduce((sum, item) => sum + item.price, 0);
-
-      return people.map(person => {
-        const total = items.reduce((sum, item) => {
+  
+      // Filter out people who have not been assigned to any item
+      const activePeople = people.filter(person =>
+        items.some(item => item.people.some(p => p.name === person.name))
+      );
+  
+      // Filter out items that are not consumed by anyone
+      const activeItems = items.filter(item => item.people.length > 0);
+  
+      const totalItemCost = activeItems.reduce((sum, item) => sum + item.price, 0);
+  
+      return activePeople.map(person => {
+        const total = activeItems.reduce((sum, item) => {
           const itemCost = item.price * (item.people.some(p => p.name === person.name) ? 1 / item.people.length : 0);
           return sum + itemCost;
         }, 0);
-
+  
         const discountedTotal = totalPayment * (total / totalItemCost);
-
+  
         return {
           name: person.name,
           total: total.toFixed(2),
@@ -148,17 +157,17 @@ document.addEventListener('DOMContentLoaded', () => {
         };
       });
     }
-
+  
     calculateBillButton.addEventListener('click', () => {
       if (!totalPaymentInput.value) {
         alert('Please enter the total payment amount.');
         return;
       }
-
+  
       const billSummary = calculateBill();
-      const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
+      const totalAmount = items.filter(item => item.people.length > 0).reduce((sum, item) => sum + item.price, 0);
       const totalDiscountedAmount = totalPaymentInput.value.trim();
-
+  
       let resultHtml = `
         <h4>Bill Summary:</h4>
         <button id="copyTable" class="btn btn-secondary mb-2">Copy Table</button>
@@ -167,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <tr>
               <th>Person</th>
               <th>Total (Rs.)</th>
-              <th>To Be Paid (Rs.)</th>
+              <th>Paid (Rs.)</th>
             </tr>
           </thead>
           <tbody>
@@ -191,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </table>
       `;
       resultDiv.innerHTML = resultHtml;
-
+  
       document.getElementById('copyTable').addEventListener('click', () => {
         const billSummaryTable = document.getElementById('billSummaryTable');
         if (billSummaryTable) {
@@ -204,11 +213,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     });
-
+  
     function updateTotalAmount() {
       const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
       totalAmountSpan.textContent = totalAmount.toFixed(2);
     }
-
+  
     window.updateTotalAmount = updateTotalAmount;
   });
+  
