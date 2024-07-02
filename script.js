@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalPaymentInput = document.getElementById('totalPayment');
     const calculateBillButton = document.getElementById('calculateBill');
     const resultDiv = document.getElementById('result');
-  
+    
     let people = [];
     let items = [];
   
@@ -171,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
       let resultHtml = `
         <h4>Bill Summary:</h4>
         <button id="copyTable" class="btn btn-secondary mb-2">Copy Table</button>
+        <span id="copySuccessSpan" class="ml-1" style = "display:none;"></span>
         <table id="billSummaryTable" class="table table-striped">
           <thead>
             <tr>
@@ -200,20 +201,47 @@ document.addEventListener('DOMContentLoaded', () => {
       </table>
       `;
       resultDiv.innerHTML = resultHtml;
-  
+      const copySuccessSpan = document.getElementById('copySuccessSpan');
       document.getElementById('copyTable').addEventListener('click', () => {
         const billSummaryTable = document.getElementById('billSummaryTable');
+        const copySuccessspan = document.getElementById('copySuccessSpan')
         if (billSummaryTable) {
           const range = document.createRange();
           range.selectNode(billSummaryTable);
           window.getSelection().removeAllRanges();
           window.getSelection().addRange(range);
-          document.execCommand('copy');
-          alert('Table copied to clipboard!');
+          try{
+            document.execCommand('copy');
+            copySuccessSpan.innerHTML = "Copied Table Successfully"
+            copySuccessSpan.classList.add("bg-success","p-1","pl-1",'pr-1',"m-2",'rounded-md');
+            showCopySuccess();
+          }catch(err){
+            console.error("Failed To copy Table:", err)
+            // copySuccessSpan.innerHTML = "Failed to copy the table"
+
+          }finally{
+            window.getSelection().removeAllRanges();
+          }
+          
+          
         }
       });
     });
-  
+    function showCopySuccess() {
+      
+    
+      if (copySuccessSpan) {
+        const copySuccessSpan = document.getElementById('copySuccessSpan');
+        copySuccessSpan.style.display = 'inline';
+    
+        setTimeout(() => {
+          copySuccessSpan.style.display = 'none';
+        }, 5000);
+      } else {
+        console.error('Element with id "copySuccess" not found.');
+      }
+    }
+
     function updateTotalAmount() {
       const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
       totalAmountSpan.textContent = totalAmount.toFixed(2);
