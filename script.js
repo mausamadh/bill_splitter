@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <tr>
               <th>Person</th>
               <th>Total (Rs.)</th>
-              <th>Paid (Rs.)</th>
+              <th>To Be Paid (Rs.)</th>
             </tr>
           </thead>
           <tbody>
