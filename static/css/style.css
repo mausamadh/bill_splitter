@@ -1,0 +1,7 @@
+/* Add transition effect for smooth theme change */
+body, #navbar {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+body{
+    background-color: hsla(48, 100%, 93%, 0.691);
+}
