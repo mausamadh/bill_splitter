@@ -236,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function copyTableToClipboard(divId) {
     const div = document.getElementById(divId);
+    const clipboarBtn = document.getElementById('copyClipboardBtn');
     if (!div) {
         alert("Div not found!");
         return;
@@ -254,9 +255,9 @@ function copyTableToClipboard(divId) {
         tableContent += rowData.join("\t") + "\n";
     }
     navigator.clipboard.writeText(tableContent).then(() => {
-        alert("Table copied to clipboard!");
+        clipboarBtn.classlist.add("btn-success");
     }).catch((err) => {
         console.error("Failed to copy table to clipboard: ", err);
-        alert("Failed to copy table. Please try again.");
+        clipboardBtn.classlist.add("btn-danger");
     });
 }
