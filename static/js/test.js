@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const usernameInput = document.getElementById("search");
     const addName = document.getElementById("search_input");
-    // const userDrop = document.getElementById("dropdown-list");
     const nameContainer = document.getElementById("name-container");
 
     const itemNameInput = document.getElementById('item-name');
@@ -16,12 +15,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let peopleList = [];
     const items = [];
+    usernameInput.focus();
 
-   
+   usernameInput.addEventListener("keypress",function(event){
+    if(event.key === "Enter"){
+        addName.click();
+    }
+   })
+   itemNameInput.addEventListener('keypress',function(event){
+    if(event.key==="Enter"){
+        itemQuantityInput.focus();
+    }
+   })
+   itemQuantityInput.addEventListener('keypress',function(event){
+    if(event.key==='Enter'){
+        itemPriceInput.focus();
+    }
+   })
+   itemPriceInput.addEventListener("keypress",function(event){
+    if(event.key==='Enter'){
+        addItemButton.click();
+    }
+   })
     addName.addEventListener('click', function(){
         username = usernameInput.value.trim();
+        usernameInput.value="";
+        usernameInput.focus();
         addNameToContainer(username);
     })
+
+   
     const addNameToContainer = (name) => {
         const div = document.createElement("div");
         div.classList.add("name-item", "badge", "bg-primary", "text-white", "p-2", "m-2", "d-inline-flex", "align-items-center", "gap-2", "me-2");
@@ -67,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
             itemNameInput.value = '';
             itemQuantityInput.value = '';
             itemPriceInput.value = '';
+            itemNameInput.focus();
         } else {
             alert("Please enter valid values for all fields.");
         }
@@ -152,6 +176,11 @@ document.addEventListener('DOMContentLoaded', () => {
             billSummaryRow.style.display = "none";
         }
     };
+    amountPaidInput.addEventListener('keypress',function(event){
+        if(event.key==="Enter"){
+            applyDiscountBtn.click();
+        }
+    })
     const applyDiscountBtn = document.getElementById("apply-discount-btn");
     applyDiscountBtn.addEventListener('click',function(){
         updateBill();
@@ -159,18 +188,17 @@ document.addEventListener('DOMContentLoaded', () => {
         clipboarBtn.style.display = "inline";
     })
     function updateBill() {
-        amountPaid=0
-        totalAmount = items.reduce((sum, item) => sum + item.total, 0);
-        amountPaid = parseFloat(amountPaidInput.value) || 0;
+        const totalAmount = items.reduce((sum, item) => sum + item.total, 0);
+        const amountPaid = parseFloat(amountPaidInput.value) || 0;
         let discount = 0;
-      
+    
         if (amountPaid < totalAmount) {
             discount = totalAmount - amountPaid;
-        
-
+        }
+    
         totalAmountElement.textContent = `Rs. ${totalAmount.toFixed(2)}`;
         billBreakdownContainer.innerHTML = '';
-
+    
         const table = document.createElement("table");
         table.classList.add("table", "table-bordered", "table-striped");
         table.innerHTML = `
@@ -183,55 +211,37 @@ document.addEventListener('DOMContentLoaded', () => {
             </thead>
             <tbody>
         `;
-
+    
+        // Consolidate amounts for each person
+        const personTotals = {};
+    
         items.forEach(item => {
+            const perPersonAmount = item.total / item.people.length;
+    
             item.people.forEach(person => {
-                const personTotal = item.total / item.people.length;
-                const discountedAmount = discount > 0 ? personTotal - (personTotal * (discount / totalAmount)) : personTotal;
-                table.innerHTML += `
-                    <tr>
-                        <td>${person}</td>
-                        <td>Rs. ${personTotal.toFixed(2)}</td>
-                        <td>Rs. ${discountedAmount.toFixed(2)}</td>
-                    </tr>
-                `;
+                if (!personTotals[person]) {
+                    personTotals[person] = 0;
+                }
+                personTotals[person] += perPersonAmount;
             });
         });
-
-        table.innerHTML += `</tbody>`;
-        billBreakdownContainer.appendChild(table);
-    }else{
-        totalAmountElement.textContent = `Rs. ${totalAmount.toFixed(2)}`;
-        billBreakdownContainer.innerHTML = '';
-
-        const table = document.createElement("table");
-        table.classList.add("table", "table-bordered", "table-striped");
-        table.innerHTML = `
-            <thead>
+    
+        // Populate the table with consolidated data
+        for (const [person, total] of Object.entries(personTotals)) {
+            const discountedAmount = discount > 0 ? total - (total * (discount / totalAmount)) : total;
+            table.innerHTML += `
                 <tr>
-                    <th>Name</th>
-                    <th>Total Amount</th>
+                    <td>${person}</td>
+                    <td>Rs. ${total.toFixed(2)}</td>
+                    <td>Rs. ${discount > 0 ? discountedAmount.toFixed(2) : '-'}</td>
                 </tr>
-            </thead>
-            <tbody>
-        `;
-
-        items.forEach(item => {
-            item.people.forEach(person => {
-                const personTotal = item.total / item.people.length;
-                table.innerHTML += `
-                    <tr>
-                        <td>${person}</td>
-                        <td>Rs. ${personTotal.toFixed(2)}</td>
-                    </tr>
-                `;
-            });
-        });
-
+            `;
+        }
+    
         table.innerHTML += `</tbody>`;
         billBreakdownContainer.appendChild(table);
     }
-    }
+    
 });
 
 function copyTableToClipboard(divId) {
