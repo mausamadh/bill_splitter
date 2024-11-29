@@ -255,9 +255,13 @@ function copyTableToClipboard(divId) {
         tableContent += rowData.join("\t") + "\n";
     }
     navigator.clipboard.writeText(tableContent).then(() => {
-        clipboarBtn.classlist.add("btn-success");
+        clipboarBtn.classList.add("btn-outline-success");
+        clipboarBtn.classList.remove("btn-outline-primary");
+        clipboarBtn.innerText="Copied"
     }).catch((err) => {
         console.error("Failed to copy table to clipboard: ", err);
-        clipboardBtn.classlist.add("btn-danger");
+        clipboarBtn.classList.remove("btn-outline-primary");
+        clipboardBtn.classList.add('btn-outline-danger');
+        clipboardBtn.innerText="Error"
     });
 }
