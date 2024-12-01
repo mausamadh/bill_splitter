@@ -188,6 +188,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const clipboarBtn = document.getElementById('copyClipboardBtn');
         clipboarBtn.style.display = "inline";
     })
+    amountPaidInput.addEventListener("keypress",function(event){
+    if(event.key === "Enter"){
+        applyDiscountBtn.click();
+    }
+   })
     function updateBill() {
         const totalAmount = items.reduce((sum, item) => sum + item.total, 0);
         const amountPaid = parseFloat(amountPaidInput.value) || 0;
