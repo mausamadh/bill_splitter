@@ -38,7 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
    })
     addName.addEventListener('click', function(){
-        username = usernameInput.value.trim();
+        str= usernameInput.value.trim();
+        username = str.charAt(0).toUpperCase() + str.slice(1)
         usernameInput.value="";
         usernameInput.focus();
         addNameToContainer(username);
