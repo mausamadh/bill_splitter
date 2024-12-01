@@ -194,8 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
         if (amountPaid < totalAmount) {
             discount = totalAmount - amountPaid;
-        }
-    
+            
         totalAmountElement.textContent = `Rs. ${totalAmount.toFixed(2)}`;
         billBreakdownContainer.innerHTML = '';
     
@@ -240,8 +239,54 @@ document.addEventListener('DOMContentLoaded', () => {
     
         table.innerHTML += `</tbody>`;
         billBreakdownContainer.appendChild(table);
-    }
+    } else {
+            
+        totalAmountElement.textContent = `Rs. ${totalAmount.toFixed(2)}`;
+        billBreakdownContainer.innerHTML = '';
     
+        const table = document.createElement("table");
+        table.classList.add("table", "table-bordered", "table-striped");
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Total Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+    
+        // Consolidate amounts for each person
+        const personTotals = {};
+    
+        items.forEach(item => {
+            const perPersonAmount = item.total / item.people.length;
+    
+            item.people.forEach(person => {
+                if (!personTotals[person]) {
+                    personTotals[person] = 0;
+                }
+                personTotals[person] += perPersonAmount;
+            });
+        });
+    
+        // Populate the table with consolidated data
+        for (const [person, total] of Object.entries(personTotals)) {
+            table.innerHTML += `
+                <tr>
+                    <td>${person}</td>
+                    <td>Rs. ${total.toFixed(2)}</td>
+                </tr>
+            `;
+        }
+    
+        table.innerHTML += `</tbody>`;
+        billBreakdownContainer.appendChild(table);
+    }
+
+
+        }
+        
 });
 
 function copyTableToClipboard(divId) {
