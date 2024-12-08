@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const usernameInput = document.getElementById("search");
     const addName = document.getElementById("search_input");
     const nameContainer = document.getElementById("name-container");
-
     const itemNameInput = document.getElementById('item-name');
     const itemQuantityInput = document.getElementById('item-quantity');
     const itemPriceInput = document.getElementById('item-price');
@@ -12,11 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const amountPaidInput = document.getElementById('amount-paid');
     const billBreakdownContainer = document.getElementById('bill-breakdown');
     const billSummaryRow = document.getElementById('bill-summary-row');
-
     let peopleList = [];
     const items = [];
     usernameInput.focus();
-
    usernameInput.addEventListener("keypress",function(event){
     if(event.key === "Enter"){
         addName.click();
@@ -44,8 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
         usernameInput.focus();
         addNameToContainer(username);
     })
-
-   
     const addNameToContainer = (name) => {
         const div = document.createElement("div");
         div.classList.add("name-item", "badge", "bg-primary", "text-white", "p-2", "m-2", "d-inline-flex", "align-items-center", "gap-2", "me-2");
@@ -54,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const deleteBtn = document.createElement("button");
         deleteBtn.textContent = "×";
         deleteBtn.classList.add("btn", "btn-sm", "btn-danger", "ms-2");
-
         deleteBtn.addEventListener("click", () => {
             div.remove();
             peopleList = peopleList.filter(person => person !== name);
@@ -66,20 +60,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             updateItemList();
         });
-
         div.appendChild(deleteBtn);
         nameContainer.appendChild(div);
         div.addEventListener("dragstart", (event) => {
             event.dataTransfer.setData('text', name);
         });
         peopleList.push(name);
-
+        display_select(peopleList);
     };
     addItemButton.addEventListener("click", () => {
         const name = itemNameInput.value.trim();
         const quantity = parseInt(itemQuantityInput.value.trim(), 10);
         const price = parseFloat(itemPriceInput.value.trim());
-
         if (name && !isNaN(quantity) && quantity > 0 && !isNaN(price) && price > 0) {
             const total = quantity * price;
             items.push({ name, quantity, price, total, people: [] });
@@ -87,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (items.length > 0) {
                 billSummaryRow.style.display = "block"; 
             }
-
             itemNameInput.value = '';
             itemQuantityInput.value = '';
             itemPriceInput.value = '';
@@ -98,12 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     function updateItemList() {
         itemContainer.innerHTML = '';
-
         items.forEach((item, index) => {
             const itemDiv = document.createElement("div");
             itemDiv.classList.add("item", "mb-3");
             itemDiv.dataset.id = index;
-
             itemDiv.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center">
                     <span><strong>${item.name}</strong> - Quantity: <input type="number" value="${item.quantity}" class="quantity-input" style="width: 60px; text-align: center;"> Price: Rs. <input type="number" value="${item.price}" class="price-input" style="width: 80px; text-align: center;"> 
@@ -118,23 +107,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="drop-area" id="drop-area-${index}" style="min-height: 40px; border: 1px dashed #ccc;"></div>
                 </div>
             `;
-
             itemContainer.appendChild(itemDiv);
             const quantityInput = itemDiv.querySelector(".quantity-input");
             const priceInput = itemDiv.querySelector(".price-input");
-
             quantityInput.addEventListener("change", (e) => {
                 item.quantity = parseInt(e.target.value, 10);
                 item.total = item.quantity * item.price;
                 updateItemList();
             });
-
             priceInput.addEventListener("change", (e) => {
                 item.price = parseFloat(e.target.value);
                 item.total = item.quantity * item.price;
                 updateItemList();
             });
-
             const dropArea = document.getElementById(`drop-area-${index}`);
             makeDropAreaDraggable(dropArea, index);
         });
@@ -144,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
         dropArea.addEventListener("dragover", (event) => {
             event.preventDefault();
         });
-
         dropArea.addEventListener("drop", (event) => {
             event.preventDefault();
             const name = event.dataTransfer.getData('text');
@@ -161,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
         items.forEach((item, index) => {
             const assignedNamesContainer = document.getElementById(`assigned-names-${index}`);
             assignedNamesContainer.innerHTML = '';
-
             item.people.forEach((person) => {
                 const nameTag = document.createElement("span");
                 nameTag.classList.add("badge", "bg-success", "text-white", "p-2", "me-2");
@@ -197,15 +180,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalAmount = items.reduce((sum, item) => sum + item.total, 0);
         const amountPaid = parseFloat(amountPaidInput.value) || 0;
         let discount = 0;
-    
         if (amountPaid < totalAmount) {
             discount = totalAmount - amountPaid;
-            
         totalAmountElement.textContent = `Rs. ${totalAmount.toFixed(2)}`;
         billBreakdownContainer.innerHTML = '';
-    
         const table = document.createElement("table");
         table.classList.add("table", "table-bordered", "table-striped");
+        table.setAttribute("id","final_bill_table");
         table.innerHTML = `
             <thead>
                 <tr>
@@ -216,10 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </thead>
             <tbody>
         `;
-    
-        // Consolidate amounts for each person
         const personTotals = {};
-    
         items.forEach(item => {
             const perPersonAmount = item.total / item.people.length;
     
@@ -230,8 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 personTotals[person] += perPersonAmount;
             });
         });
-    
-        // Populate the table with consolidated data
         for (const [person, total] of Object.entries(personTotals)) {
             const discountedAmount = discount > 0 ? total - (total * (discount / totalAmount)) : total;
             table.innerHTML += `
@@ -242,16 +218,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 </tr>
             `;
         }
-    
         table.innerHTML += `</tbody>`;
         billBreakdownContainer.appendChild(table);
     } else {
-            
         totalAmountElement.textContent = `Rs. ${totalAmount.toFixed(2)}`;
         billBreakdownContainer.innerHTML = '';
     
         const table = document.createElement("table");
         table.classList.add("table", "table-bordered", "table-striped");
+        table.setAttribute("id", "final_bill_table")
         table.innerHTML = `
             <thead>
                 <tr>
@@ -261,13 +236,9 @@ document.addEventListener('DOMContentLoaded', () => {
             </thead>
             <tbody>
         `;
-    
-        // Consolidate amounts for each person
         const personTotals = {};
-    
         items.forEach(item => {
             const perPersonAmount = item.total / item.people.length;
-    
             item.people.forEach(person => {
                 if (!personTotals[person]) {
                     personTotals[person] = 0;
@@ -275,8 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 personTotals[person] += perPersonAmount;
             });
         });
-    
-        // Populate the table with consolidated data
         for (const [person, total] of Object.entries(personTotals)) {
             table.innerHTML += `
                 <tr>
@@ -285,44 +254,78 @@ document.addEventListener('DOMContentLoaded', () => {
                 </tr>
             `;
         }
-    
         table.innerHTML += `</tbody>`;
         billBreakdownContainer.appendChild(table);
+            }
     }
-
-
-        }
         
 });
 
-function copyTableToClipboard(divId) {
-    const div = document.getElementById(divId);
-    const clipboarBtn = document.getElementById('copyClipboardBtn');
-    if (!div) {
-        alert("Div not found!");
-        return;
-    }
-    const table = div.querySelector("table");
-    if (!table) {
-        alert("Table not found inside the div!");
-        return;
-    }
-    let tableContent = "";
-    for (let row of table.rows) {
-        let rowData = [];
-        for (let cell of row.cells) {
-            rowData.push(cell.innerText.trim());
+function copyTableToClipboard() {
+    
+    const totalamt = document.getElementById('amount-paid').value;
+    const table = document.getElementById("final_bill_table");
+    const payee = document.getElementById("payer-select").value;
+    const pretext = "Today's Total: Rs. " + totalamt;
+    const posttext = "Payment to: " + payee;
+    const tempDiv = document.createElement('div');
+    document.body.appendChild(tempDiv);
+    tempDiv.innerHTML = "";
+    if (table) {
+        tempDiv.innerHTML = `<p>${pretext}</p><br />`;
+        const tableClone = table.cloneNode(true);
+        tempDiv.appendChild(tableClone);
+        tempDiv.innerHTML += `<br /><p>${posttext}</p>`;
+        const range = document.createRange();
+        const selection = window.getSelection();
+        range.selectNodeContents(tempDiv);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        try {
+            document.execCommand('copy');
+            startTimer("yes");
+        } catch (err) {
+        console.error("Error copying data to clipboard:", err);
+            startTimer("no");
+        } finally {
+            document.body.removeChild(tempDiv);
+            selection.removeAllRanges();
         }
-        tableContent += rowData.join("\t") + "\n";
+    } else {
+        console.error("Table with ID 'final_bill_table' not found.");
     }
-    navigator.clipboard.writeText(tableContent).then(() => {
-        clipboarBtn.classList.add("btn-outline-success");
-        clipboarBtn.classList.remove("btn-outline-primary");
-        clipboarBtn.innerText="Copied"
-    }).catch((err) => {
-        console.error("Failed to copy table to clipboard: ", err);
-        clipboarBtn.classList.remove("btn-outline-primary");
-        clipboardBtn.classList.add('btn-outline-danger');
-        clipboardBtn.innerText="Error"
-    });
+}
+function startTimer(copied) {
+    const clipboardBtn = document.getElementById('copyClipboardBtn');
+    if (copied = "yes"){
+        clipboardBtn.classList.add("btn-outline-success");
+        clipboardBtn.classList.remove("btn-outline-primary");
+        clipboardBtn.innerText = "Copied!";
+    }else{
+            clipboardBtn.classList.remove("btn-outline-primary");
+            clipboardBtn.classList.add("btn-outline-danger");
+            clipboardBtn.innerText = "Error";
+    }
+    setTimeout(function() {
+        clipboardBtn.classList.add("btn-outline-primary");
+        clipboardBtn.classList.remove("btn-outline-success");
+        clipboardBtn.innerText = "Copy Table";
+    }, 2000);
+}
+
+function display_select(peopleList) {
+    const payer_div = document.getElementById("payer");
+    payer_div.innerHTML="";
+    const payer = document.createElement("select");
+    payer.classList.add("form-select", "form-select-sm");
+    payer.setAttribute("id","payer-select");
+    for (const person of peopleList) {
+        const option = document.createElement("option");
+        option.setAttribute("value", person);
+        option.innerHTML = person;
+        payer.appendChild(option);
+    }
+    console.log("executed");
+    payer_div.appendChild(payer);
 }
