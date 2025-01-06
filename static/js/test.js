@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     addItemButton.addEventListener("click", () => {
         const name = itemNameInput.value.trim();
-        const quantity = parseInt(itemQuantityInput.value.trim(), 10);
+        const quantity = parseFloat(itemQuantityInput.value.trim());
         const price = parseFloat(itemPriceInput.value.trim());
         if (name && !isNaN(quantity) && quantity > 0 && !isNaN(price) && price > 0) {
             const total = quantity * price;
