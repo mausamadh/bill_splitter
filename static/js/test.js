@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const quantityInput = itemDiv.querySelector(".quantity-input");
             const priceInput = itemDiv.querySelector(".price-input");
             quantityInput.addEventListener("change", (e) => {
-                item.quantity = parseInt(e.target.value, 10);
+                item.quantity = parseFloat(e.target.value);
                 item.total = item.quantity * item.price;
                 updateItemList();
             });
